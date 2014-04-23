@@ -6,20 +6,11 @@ require 'FileUtils'
 # http://www.wooptoot.com/file-upload-with-sinatra
 # https://gist.github.com/gavinheavyside/225381
 
+# 默认上传文件存放的目录是脚本所处目录的upload文件夹
 UPLOAD_PATH = 'upload'
 
 get '/' do
-  <<-HTML
-  <html>
-  <head><title>可以一次选多个文件</title></head>
-  <body>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-      <input type="file" name="images[]" multiple />
-      <input type="submit" />
-    </form>
-  </body>
-  </html>
-  HTML
+  erb :index # 去修改 views/index.erb
 end
 
 post '/upload' do
@@ -27,12 +18,12 @@ post '/upload' do
 
   # 实际保存文件
   params['images'].each do |f|
-    #File.write("#{UPLOAD_PATH}/#{f[:filename]}", f[:tempfile].read)
-    FileUtils.cp f[:tempfile], "#{UPLOAD_PATH}/#{f[:filename]}"
+    # 防止同名文件覆盖之前的
+    # 我们给文件名加上时间戳？
+    new_filename = "#{f[:filename]}_#{Time.now.strftime('%Y-%m-%d-%H-%M-%S')}"
+    FileUtils.cp f[:tempfile], "#{UPLOAD_PATH}/#{new_filename}"
   end
 
   # 给用户反馈信息
-  res = "接受到以下文件：\n"
-  res << params['images'].map { |f| f[:filename] }.join("\n")
-  res
+  params['images'].reduce("接受到以下文件：\n") { |a, f| a << f[:filename] << "\n" }
 end
