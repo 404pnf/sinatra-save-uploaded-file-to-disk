@@ -1,4 +1,5 @@
 require 'sinatra'
+require 'FileUtils'
 
 # 参考例子
 # http://stackoverflow.com/questions/2686044/file-upload-with-sinatra
@@ -26,7 +27,8 @@ post '/upload' do
 
   # 实际保存文件
   params['images'].each do |f|
-    File.write("#{UPLOAD_PATH}/#{f[:filename]}", f[:tempfile].read)
+    #File.write("#{UPLOAD_PATH}/#{f[:filename]}", f[:tempfile].read)
+    FileUtils.cp f[:tempfile], "#{UPLOAD_PATH}/#{f[:filename]}"
   end
 
   # 给用户反馈信息
